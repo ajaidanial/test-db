@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from testapp.models import *
@@ -26,3 +27,31 @@ def tasks_created_by_user(name: str) -> List[str]:
         if task.creator.name == user.name:
             created_tasks.append(user.name)
     return created_tasks
+
+
+def tasks_with_expired_due_date(name: str) -> List[str]:
+    user = User.objects.get(name=name)
+    due_tasks = []
+    for task in user.assigned_tasks.all():
+        if task.due_date > datetime.now().date():
+            due_tasks.append(task.name)
+    return due_tasks
+
+
+def tasks_with_three_days_due(name: str) -> List[str]:
+    user = User.objects.get(name=name)
+    due_tasks = []
+    for task in user.assigned_tasks.all():
+        if 3 >= (datetime.now().date() - task.due_date).days > 0:
+            due_tasks.append(task.name)
+    return due_tasks
+
+
+def task_desc(name: str) -> List[str]:
+    user = User.objects.get(name=name)
+    for task in user.assigned_tasks.all():
+        print("Task Name: ", task.name)
+        print("Task desc: ", task.description)
+        print("Task due date: ", task.due_date)
+        print("Task List: ", task.task_list)
+        print("------------------------------------")
