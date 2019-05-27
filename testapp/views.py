@@ -1,32 +1,39 @@
 from django.http import HttpResponse, JsonResponse
+from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
 
-from testapp.serializers import SnippetSerializer
+from testapp.serializers import UserSerializer
 
 
 @csrf_exempt
 def user_op(request):
     if request.method == 'GET':
-        name: str = request.GET['name']
-        email: str = request.GET['email']
-        return HttpResponse(name + " " + email)
+        try:
+            name: str = request.GET['name']
+            email: str = request.GET['email']
+            return HttpResponse(name + " " + email)
+        #     TODO: token auth
+        except MultiValueDictKeyError:
+            return HttpResponse("user op")
     elif request.method == 'POST':
-        user = SnippetSerializer(data=dict(request.POST.items()))
+        user = UserSerializer(data=dict(request.POST.items()))
         if user.is_valid():
             user.save()
-            return JsonResponse(user.data, status=201)
+            # token = Token.objects.create(user=user)
+            return JsonResponse(user.data)
+        #     TODO: token auth
         else:
-            return JsonResponse(user.errors, status=400)
+            return JsonResponse(user.errors)
     else:
-        return HttpResponse("Hello, world! - user op")
+        return HttpResponse("user op")
 
 
 def task_op(request):
-    return HttpResponse("Hello, world! - task op")
+    return HttpResponse("task op")
 
 
 def tasklist_op(request):
-    return HttpResponse("Hello, world! - tasklist op")
+    return HttpResponse("tasklist op")
 
 
 """
