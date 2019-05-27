@@ -1,10 +1,11 @@
 from datetime import datetime
 
 from django.db.models.query import QuerySet
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from testapp.models import *
+from testapp.serializers import SnippetSerializer
 
 
 def clear_all_tasks_for_user(name: str) -> None:
@@ -63,10 +64,11 @@ def user_op(request):
         email: str = request.GET['email']
         return HttpResponse(name)
     elif request.method == 'POST':
-        name: str = request.POST.get('name')
-        email: str = request.POST.get('email')
-        create_user(name, email)
-        return HttpResponse(name)
+        serializer = SnippetSerializer(data=dict(request.POST.items()))
+        if serializer.is_valid():
+            serializer.save()
+        return JsonResponse(serializer.data, status=201)
+    # return JsonResponse(serializer.errors, status=400)
     return HttpResponse("Hello, world! - user op")
 
 
