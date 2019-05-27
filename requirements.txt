@@ -4,3 +4,6 @@ notebook
 bpython
 django_extensions
 pytest
+djangorestframework
+markdown
+django-filter

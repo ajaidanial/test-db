@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db.models.query import QuerySet
+from django.http import HttpResponse
 
 from testapp.models import *
 
@@ -47,3 +48,7 @@ def display_task_data_for_user(tasks: dict) -> None:
     for t in tasks:
         print(t)
         print("---------------------------------")
+
+
+def test(request):
+    return HttpResponse("Hello, world!")
