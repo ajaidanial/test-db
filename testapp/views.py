@@ -5,53 +5,41 @@ from testapp.models import *
 
 
 def clear_all_tasks_for_user(name: str) -> None:
-    user = User.objects.get(name=name)
-    for task in user.assigned_tasks.all():
-        task.is_open = False
-        task.save()
+    user = get_user(name, prefetch="assigned_tasks")
+    user.assigned_tasks.update(is_open=False)
 
 
-def has_user_open_tasks(name: str) -> List[str]:
-    user = User.objects.get(name=name)
-    open_tasks = []
-    for task in user.assigned_tasks.all():
-        if task.is_open:
-            open_tasks.append(task.name)
-    return open_tasks
+def has_user_open_tasks(name: str) -> bool:
+    if Task.objects.filter(is_open=True, assigned_users=get_user(name)).count():
+        return True
+    return False
 
 
-def tasks_created_by_user(name: str) -> List[str]:
-    user = User.objects.get(name=name)
-    created_tasks = []
-    for task in user.created_tasks.all():
-        # if task.creator.name == user.name:
-        created_tasks.append(task.name)
-    return created_tasks
+def tasks_created_by_user(name: str) -> List[Task]:
+    return Task.objects.filter(creator=get_user(name))
 
 
-def tasks_with_expired_due_date(name: str) -> List[str]:
-    user = User.objects.get(name=name)
-    due_tasks = []
-    for task in user.assigned_tasks.all():
-        if task.due_date > datetime.now().date():
-            due_tasks.append(task.name)
-    return due_tasks
+def tasks_with_expired_due_date(name: str) -> List[Task]:
+    return Task.objects.filter(due_date__lt=datetime.now().date(), assigned_users=get_user(name))
 
 
-def tasks_with_three_days_due(name: str) -> List[str]:
-    user = User.objects.get(name=name)
-    due_tasks: List[str] = []
-    for task in user.assigned_tasks.all():
-        if 3 >= (datetime.now().date() - task.due_date).days > 0:
-            due_tasks.append(task.name)
-    return due_tasks
+def tasks_with_three_days_due(name: str) -> List[Task]:
+    return Task.objects.filter(due_date__lt=datetime.now().date(), assigned_users=get_user(name), due_date__lte=3)
 
 
-def task_desc(name: str) -> List[str]:
-    user = User.objects.prefetch_related('assigned_tasks__task_list').get(name=name)
-    for task in user.assigned_tasks.all():
-        print("Task Name: ", task.name)
-        print("Task desc: ", task.description)
-        print("Task due date: ", task.due_date)
-        print("Task List: ", task.task_list)
-        print("------------------------------------")
+def tasks_desc_for_user(name: str) -> None:
+    tasks = Task.objects.prefetch_related('assigned_users').filter(assigned_users=get_user(name))
+    display_task_data_for_user(tasks)
+
+
+def get_user(name, prefetch="") -> User:
+    try:
+        return User.objects.prefetch_related(prefetch).get(name=name)
+    except AttributeError:
+        return User.objects.get(name=name)
+
+
+def display_task_data_for_user(tasks: dict) -> None:
+    for t in tasks:
+        print(t)
+        print("---------------------------------")
