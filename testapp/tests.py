@@ -21,8 +21,13 @@ def test_has_user_open_tasks(create_test_data_1):
     assert views.has_user_open_tasks('test_user') == True
 
 
-def test_clear_all_tasks_for_user():
-    pass
+def test_clear_all_tasks_for_user(create_test_data_1):
+    task: models.Task = models.Task.objects.get(name='test_task_1')
+    assert task.is_open is True
+    views.clear_all_tasks_for_user('test_user')
+    task.refresh_from_db()
+    # task: models.Task = models.Task.objects.get(name='test_task_1')
+    assert task.is_open is False
 
 
 def test_tasks_with_expired_due_date(create_test_data_1):
