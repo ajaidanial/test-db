@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from testapp.models import *
 
@@ -33,7 +34,7 @@ def tasks_with_three_days_due(name: str) -> QuerySet:
 
 
 def tasks_desc_for_user(name: str) -> None:
-    tasks = Task.objects.prefetch_related('assigned_users').filter(assigned_users=get_user(name))
+    tasks = Task.objects.prefetch_related('assigned_users').filter(assigned_users=get_user(name)).values()
     display_task_data_for_user(tasks)
 
 
@@ -45,12 +46,27 @@ def get_user(name, prefetch="") -> User:
 
 
 def display_task_data_for_user(tasks: dict) -> None:
-    for t in tasks:
-        print(t)
-        print("---------------------------------")
+    for task in tasks:
+        print(task)
 
 
+def create_user(name: str, email: str) -> None:
+    user: User = User(name=name, email=email)
+    user.save()
+    return user.key
+
+
+@csrf_exempt
 def user_op(request):
+    if request.method == 'GET':
+        name: str = request.GET['name']
+        email: str = request.GET['email']
+        return HttpResponse(name)
+    elif request.method == 'POST':
+        name: str = request.POST.get('name')
+        email: str = request.POST.get('email')
+        create_user(name, email)
+        return HttpResponse(name)
     return HttpResponse("Hello, world! - user op")
 
 
@@ -63,15 +79,15 @@ def tasklist_op(request):
 
 
 """
-user op
+user op '/'
     - login (token)
     - register (tokeb)
 
-tasklist
+tasklist 'tasklist'
     - create
     - delete
 
-task
+task 'task'
     - delete
     - create
     - get all tasks for user
