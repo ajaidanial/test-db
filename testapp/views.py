@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import List
+
+from django.db.models.query import QuerySet
 
 from testapp.models import *
 
@@ -15,15 +16,15 @@ def has_user_open_tasks(name: str) -> bool:
     return False
 
 
-def tasks_created_by_user(name: str) -> List[Task]:
+def tasks_created_by_user(name: str) -> QuerySet:
     return Task.objects.filter(creator=get_user(name))
 
 
-def tasks_with_expired_due_date(name: str) -> List[Task]:
+def tasks_with_expired_due_date(name: str) -> QuerySet:
     return Task.objects.filter(due_date__lt=datetime.now().date(), assigned_users=get_user(name))
 
 
-def tasks_with_three_days_due(name: str) -> List[Task]:
+def tasks_with_three_days_due(name: str) -> QuerySet:
     return Task.objects.filter(due_date__lt=datetime.now().date(), assigned_users=get_user(name), due_date__lte=3)
 
 
