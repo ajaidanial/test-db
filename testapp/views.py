@@ -62,14 +62,16 @@ def user_op(request):
     if request.method == 'GET':
         name: str = request.GET['name']
         email: str = request.GET['email']
-        return HttpResponse(name)
+        return HttpResponse(name + " " + email)
     elif request.method == 'POST':
-        serializer = SnippetSerializer(data=dict(request.POST.items()))
-        if serializer.is_valid():
-            serializer.save()
-        return JsonResponse(serializer.data, status=201)
-    # return JsonResponse(serializer.errors, status=400)
-    return HttpResponse("Hello, world! - user op")
+        user = SnippetSerializer(data=dict(request.POST.items()))
+        if user.is_valid():
+            user.save()
+            return JsonResponse(user.data, status=201)
+        else:
+            return JsonResponse(user.errors, status=400)
+    else:
+        return HttpResponse("Hello, world! - user op")
 
 
 def task_op(request):

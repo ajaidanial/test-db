@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from testapp import views
 
 urlpatterns = [
     path('', views.user_op, name='user operations'),
