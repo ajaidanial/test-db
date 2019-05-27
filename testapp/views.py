@@ -25,7 +25,10 @@ def tasks_with_expired_due_date(name: str) -> QuerySet:
 
 
 def tasks_with_three_days_due(name: str) -> QuerySet:
-    return Task.objects.filter(due_date__lt=datetime.now().date(), assigned_users=get_user(name), due_date__lte=3)
+    today = datetime.now().date()
+    three_days_ahead = datetime(today.year, today.month, today.day + 3)
+    print(three_days_ahead.date())
+    return Task.objects.filter(due_date__gt=today, assigned_users=get_user(name), due_date__lte=three_days_ahead)
 
 
 def tasks_desc_for_user(name: str) -> None:
