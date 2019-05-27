@@ -3,3 +3,4 @@ psycopg2
 notebook
 bpython
 django_extensions
+pytest

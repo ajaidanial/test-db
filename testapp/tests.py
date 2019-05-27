@@ -1,3 +1,10 @@
-from django.test import TestCase
+# content of test_sample.py
+import pytest
 
-# Create your tests here.
+from testapp import views
+
+pytestmark = pytest.mark.django_db
+
+
+def test_get_user(db_setup):
+    assert views.get_user('test').name == 'test'
