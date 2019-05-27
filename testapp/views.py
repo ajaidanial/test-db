@@ -50,5 +50,30 @@ def display_task_data_for_user(tasks: dict) -> None:
         print("---------------------------------")
 
 
-def test(request):
-    return HttpResponse("Hello, world!")
+def user_op(request):
+    return HttpResponse("Hello, world! - user op")
+
+
+def task_op(request):
+    return HttpResponse("Hello, world! - task op")
+
+
+def tasklist_op(request):
+    return HttpResponse("Hello, world! - tasklist op")
+
+
+"""
+user op
+    - login (token)
+    - register (tokeb)
+
+tasklist
+    - create
+    - delete
+
+task
+    - delete
+    - create
+    - get all tasks for user
+    - close task
+"""
