@@ -28,7 +28,7 @@ def user_op(request):
 
 @csrf_exempt
 def task_op(request):
-    if request.method == 'POST':
+    if request.method == 'POST':  # to create, delete and close a task
         try:
             command: str = request.POST['command']
             username: str = request.POST['username']
@@ -41,23 +41,19 @@ def task_op(request):
             tasklist_name: str = request.POST['task_name']
             is_open: bool = request.POST['is_open']
             assigned_users: list = request.POST['assigned_users']
-            pass
         if command == 'delete':
             return JsonResponse(database_operations.delete_task(taskname, username, received_token))
         if command == 'close':
             return JsonResponse(database_operations.close_task(taskname, username, received_token))
         return HttpResponse(None)
 
-    if request.method == 'GET':
+    if request.method == 'GET':  # to display assigned task to user
         try:
             username: str = request.GET['username']
             received_token: str = request.META.get('HTTP_AUTHORIZATION')
         except MultiValueDictKeyError:
             return HttpResponse(None)
         return JsonResponse(database_operations.get_tasks_for_user(username, received_token))
-
-        pass  # get all tasks
-
     return HttpResponse(None)
 
 
