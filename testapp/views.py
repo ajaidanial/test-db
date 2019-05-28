@@ -1,7 +1,9 @@
 from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authtoken.models import Token
 
+from testapp.models import User
 from testapp.serializers import UserSerializer, TaskListSerializer
 
 
@@ -10,16 +12,18 @@ def user_op(request):
     if request.method == 'GET':
         try:
             name: str = request.GET['name']
-            email: str = request.GET['email']
-            return HttpResponse(name + " " + email)
+            password: str = request.GET['password']
+            return HttpResponse(name + " " + password)
         #     TODO: token auth
         except MultiValueDictKeyError:
-            return HttpResponse("user op")
+            return HttpResponse(None)
     elif request.method == 'POST':
         user = UserSerializer(data=dict(request.POST.items()))
         if user.is_valid():
             user.save()
-            # token = Token.objects.create(user=user)
+            u = User.objects.get(name=request.POST.get('name'))
+            token = Token.objects.create(user=u)
+            print(token)
             return JsonResponse(user.data)
         #     TODO: token auth
         else:
