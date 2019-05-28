@@ -35,15 +35,17 @@ def task_op(request):
 def tasklist_op(request):
     if request.method == 'POST':
         try:
+            command: str = request.POST['command']
             username: str = request.POST['username']
             tasklist_name: str = request.POST['taslklist_name']
             received_token: str = request.META.get('HTTP_AUTHORIZATION')
-            # return HttpResponse(received_token)
         except MultiValueDictKeyError:
-            return HttpResponse("hello")
-        return JsonResponse(database_operations.create_tasklist_api(username, received_token, tasklist_name))
-    if request.method == 'DELETE':
-        pass
+            return HttpResponse(None)
+        if command == 'create':
+            return JsonResponse(database_operations.create_tasklist_api(username, received_token, tasklist_name))
+        if command == 'delete':
+            return JsonResponse(database_operations.delete_tasklist_api(username, received_token, tasklist_name))
+        return HttpResponse(None)
     return HttpResponse(None)
 
 
@@ -52,9 +54,9 @@ def tasklist_op(request):
 #     - login (token)
 #     - register (tokeb)
 
-tasklist 'tasklist'
-    - create
-    - delete
+# tasklist 'tasklist'
+#     - create
+#     - delete
 
 task 'task'
     - delete
