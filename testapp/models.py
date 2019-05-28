@@ -3,20 +3,16 @@ from django.db import models
 
 
 class User(AbstractUser):
-    name = models.CharField(max_length=300)
-    username = models.CharField(max_length=300, unique=True)
+    name = models.CharField(max_length=300, unique=True)
     email = models.CharField(max_length=300, unique=True)
     password = models.CharField(max_length=300, default='test')
-    # REQUIRED_FIELDS = ['name', 'password']
-    # USERNAME_FIELD = 'email'
-    # objects = UserManager()
 
     def __str__(self):
         return self.name
 
 
 class Task(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=300)
     created_date = models.DateField()
     due_date = models.DateField()
     is_open = models.BooleanField(default=True)
@@ -29,7 +25,7 @@ class Task(models.Model):
 
 
 class TaskList(models.Model):
-    name = models.CharField(max_length=30, unique=True)
+    name = models.CharField(max_length=300, unique=True)
     created_date = models.DateField()
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
 
