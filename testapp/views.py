@@ -8,19 +8,23 @@ from testapp.serializers import TaskListSerializer
 
 @csrf_exempt
 def user_op(request):
-    try:
-        username: str = request.GET['username']
-        password: str = request.GET['password']
-        if request.GET['email'] is not None:
-            email: str = request.GET['email']
-    except MultiValueDictKeyError:
-        return None
-
     if request.method == 'GET':
-        return database_operations.login_or_singup_user_and_return_token(username, password)
+        try:
+            username: str = request.GET['username']
+            password: str = request.GET['password']
+        except MultiValueDictKeyError:
+            return HttpResponse(None)
+        return JsonResponse(database_operations.login_or_singup_user_and_return_token(username, password))
     if request.method == 'POST':
-        database_operations.login_or_singup_user_and_return_token(username, password, email)
-    return None
+        try:
+            username: str = request.POST['username']
+            password: str = request.POST['password']
+            email: str = request.POST['email']
+        except MultiValueDictKeyError:
+            return HttpResponse(None)
+        return JsonResponse(database_operations.login_or_singup_user_and_return_token(username, password, email))
+
+    return HttpResponse(None)
 
 
 @csrf_exempt

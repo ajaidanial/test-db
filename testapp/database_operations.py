@@ -74,12 +74,11 @@ def return_user_dict(user: User) -> dict:
 
 def login_or_singup_user_and_return_token(username: str, password: str, email: str = None) -> dict:
     if email is None:  # login of user
-        return return_user_dict(get_user(username))  # TODO: username and password check
+        return return_user_dict(get_user(username))  # TODO: username and password check | does not exist
     else:  # sign up for user
         data: dict = {'username': username, 'password': password, 'email': email}
         user = UserSerializer(data=data)
         if user.is_valid():
-            print("asd")
             user.save()
             token = Token.objects.create(user=get_user(username))
             return_data = user.data
@@ -87,4 +86,3 @@ def login_or_singup_user_and_return_token(username: str, password: str, email: s
             return return_data
         else:
             return user.errors
-    pass
