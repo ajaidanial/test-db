@@ -2,8 +2,8 @@ from django.db import models
 
 
 class User(models.Model):
-    name = models.CharField(max_length=30)
-    email = models.CharField(max_length=30, default='test@test.com')
+    name = models.CharField(max_length=30, unique=True)
+    email = models.CharField(max_length=30, unique=True)
 
     def __str__(self):
         return self.name
@@ -11,7 +11,6 @@ class User(models.Model):
 
 class Task(models.Model):
     name = models.CharField(max_length=30)
-    description = models.CharField(max_length=30)
     created_date = models.DateField()
     due_date = models.DateField()
     is_open = models.BooleanField(default=True)
@@ -24,8 +23,7 @@ class Task(models.Model):
 
 
 class TaskList(models.Model):
-    name = models.CharField(max_length=30)
-    desc = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, unique=True)
     created_date = models.DateField()
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
 

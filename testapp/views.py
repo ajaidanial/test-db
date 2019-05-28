@@ -2,7 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
 
-from testapp.serializers import UserSerializer
+from testapp.serializers import UserSerializer, TaskListSerializer
 
 
 @csrf_exempt
@@ -28,11 +28,21 @@ def user_op(request):
         return HttpResponse("user op")
 
 
+@csrf_exempt
 def task_op(request):
     return HttpResponse("task op")
 
 
+@csrf_exempt
 def tasklist_op(request):
+    if request.method == 'POST':
+        tasklist = TaskListSerializer(data=dict(request.POST.items()))
+        if tasklist.is_valid():
+            tasklist.save()
+            return JsonResponse(tasklist.data)
+        #     TODO: token auth
+        else:
+            return JsonResponse(tasklist.errors)
     return HttpResponse("tasklist op")
 
 
