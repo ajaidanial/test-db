@@ -1,35 +1,26 @@
 from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.authtoken.models import Token
 
-from testapp.models import User
-from testapp.serializers import UserSerializer, TaskListSerializer
+from testapp import database_operations
+from testapp.serializers import TaskListSerializer
 
 
 @csrf_exempt
 def user_op(request):
+    try:
+        username: str = request.GET['username']
+        password: str = request.GET['password']
+        if request.GET['email'] is not None:
+            email: str = request.GET['email']
+    except MultiValueDictKeyError:
+        return None
+
     if request.method == 'GET':
-        try:
-            name: str = request.GET['username']
-            password: str = request.GET['password']
-            return HttpResponse(name + " " + password)
-        #     TODO: token auth
-        except MultiValueDictKeyError:
-            return HttpResponse(None)
-    elif request.method == 'POST':
-        user = UserSerializer(data=dict(request.POST.items()))
-        if user.is_valid():
-            user.save()
-            u = User.objects.get(username=request.POST.get('username'))
-            token = Token.objects.create(user=u)
-            print(token)
-            return JsonResponse(user.data)
-        #     TODO: token auth
-        else:
-            return JsonResponse(user.errors)
-    else:
-        return HttpResponse("user op")
+        return database_operations.login_or_singup_user_and_return_token(username, password)
+    if request.method == 'POST':
+        database_operations.login_or_singup_user_and_return_token(username, password, email)
+    return None
 
 
 @csrf_exempt

@@ -1,8 +1,10 @@
 from datetime import datetime
 
 from django.db.models.query import QuerySet
+from rest_framework.authtoken.models import Token
 
 from testapp.models import *
+from testapp.serializers import UserSerializer
 
 
 def clear_all_tasks_for_user(name: str) -> None:
@@ -37,10 +39,10 @@ def tasks_desc_for_user(name: str) -> None:
 
 
 def get_user(name, prefetch="") -> User:
-    try:
-        return User.objects.prefetch_related(prefetch).get(name=name)
-    except AttributeError:
-        return User.objects.get(name=name)
+    if prefetch != "":
+        return User.objects.prefetch_related(prefetch).get(username=name)
+    else:
+        return User.objects.get(username=name)
 
 
 def display_task_data_for_user(tasks: dict) -> None:
@@ -53,4 +55,36 @@ def create_user(name: str, email: str) -> None:
     user.save()
     return user.key
 
+
+def return_user_dict(user: User) -> dict:
+    token = Token.objects.get(user=user)
+    data: dict = {
+        'username': user.username,
+        'password': user.password,
+        'email': user.email,
+        'token': token.key
+    }
+    return data
+
+
 # TODO: look here
+
+# For api request
+
+
+def login_or_singup_user_and_return_token(username: str, password: str, email: str = None) -> dict:
+    if email is None:  # login of user
+        return return_user_dict(get_user(username))  # TODO: username and password check
+    else:  # sign up for user
+        data: dict = {'username': username, 'password': password, 'email': email}
+        user = UserSerializer(data=data)
+        if user.is_valid():
+            print("asd")
+            user.save()
+            token = Token.objects.create(user=get_user(username))
+            return_data = user.data
+            return_data['token'] = token.key
+            return return_data
+        else:
+            return user.errors
+    pass
