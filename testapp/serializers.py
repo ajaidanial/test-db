@@ -6,7 +6,7 @@ from testapp.models import User, TaskList
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'name', 'email', 'password')
+        fields = ('id', 'username', 'email', 'password')
 
 
 class TaskListSerializer(serializers.ModelSerializer):

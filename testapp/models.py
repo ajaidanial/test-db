@@ -3,12 +3,12 @@ from django.db import models
 
 
 class User(AbstractUser):
-    name = models.CharField(max_length=300, unique=True)
+    username = models.CharField(max_length=300, unique=True)
     email = models.CharField(max_length=300, unique=True)
     password = models.CharField(max_length=300, default='test')
 
     def __str__(self):
-        return self.name
+        return self.username
 
 
 class Task(models.Model):

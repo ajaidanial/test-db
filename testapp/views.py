@@ -11,7 +11,7 @@ from testapp.serializers import UserSerializer, TaskListSerializer
 def user_op(request):
     if request.method == 'GET':
         try:
-            name: str = request.GET['name']
+            name: str = request.GET['username']
             password: str = request.GET['password']
             return HttpResponse(name + " " + password)
         #     TODO: token auth
@@ -21,7 +21,7 @@ def user_op(request):
         user = UserSerializer(data=dict(request.POST.items()))
         if user.is_valid():
             user.save()
-            u = User.objects.get(name=request.POST.get('name'))
+            u = User.objects.get(username=request.POST.get('username'))
             token = Token.objects.create(user=u)
             print(token)
             return JsonResponse(user.data)
