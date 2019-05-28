@@ -28,7 +28,20 @@ def user_op(request):
 
 @csrf_exempt
 def task_op(request):
-    return HttpResponse("task op")
+    if request.method == 'POST':
+        pass  # create delete close
+
+    if request.method == 'GET':
+        try:
+            username: str = request.GET['username']
+            received_token: str = request.META.get('HTTP_AUTHORIZATION')
+        except MultiValueDictKeyError:
+            return HttpResponse(None)
+        return JsonResponse(database_operations.get_tasks_for_user(username, received_token))
+
+        pass  # get all tasks
+
+    return HttpResponse(None)
 
 
 @csrf_exempt

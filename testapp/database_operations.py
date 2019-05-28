@@ -125,3 +125,13 @@ def is_authenticated_user(user: User, received_token: str):
     if Token.objects.get(user=user).key == received_token:
         return True
     return False
+
+
+def get_tasks_for_user(username: str, received_token: str) -> dict:
+    user = get_user(username, prefetch='assigned_tasks')
+    if is_authenticated_user(user, received_token):
+        assigned_task_names = list(task.name for task in user.assigned_tasks.all())
+        return_data = {'username': user.username, 'assigned_tasks': assigned_task_names}
+        return return_data
+    else:
+        return {"message": "User not authenticated"}
