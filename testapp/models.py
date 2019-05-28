@@ -12,7 +12,7 @@ class User(AbstractUser):
 
 
 class Task(models.Model):
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=300, unique=True)
     created_date = models.DateField()
     due_date = models.DateField()
     is_open = models.BooleanField(default=True)

@@ -135,3 +135,29 @@ def get_tasks_for_user(username: str, received_token: str) -> dict:
         return return_data
     else:
         return {"message": "User not authenticated"}
+
+
+def close_task(taskname: str, username: str, received_token: str) -> dict:
+    user = get_user(username)
+    if is_authenticated_user(user, received_token):
+        try:
+            task = Task.objects.get(name=taskname)
+            task.is_open = False
+            task.save()
+            return {"message": "Task closed"}
+        except ObjectDoesNotExist:
+            return {"message": "Task does not exists"}
+    else:
+        return {"message": "User not authenticated"}
+
+
+def delete_task(taskname: str, username: str, received_token: str) -> dict:
+    user = get_user(username)
+    if is_authenticated_user(user, received_token):
+        try:
+            Task.objects.get(name=taskname, creator=user).delete()
+            return {"message": "Task deleted"}
+        except ObjectDoesNotExist:
+            return {"message": "Task does not exists || Permission error"}
+    else:
+        return {"message": "User not authenticated"}
