@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db import IntegrityError
 from django.db.models.query import QuerySet
 from rest_framework.authtoken.models import Token
 
@@ -86,3 +87,29 @@ def login_or_singup_user_and_return_token(username: str, password: str, email: s
             return return_data
         else:
             return user.errors
+
+
+def create_tasklist_api(username: str, received_token: str, tasklist_name: str) -> dict:
+    user = get_user(username)
+    if is_authendicated_user(user, received_token):
+        try:
+            tasklist = TaskList(name=tasklist_name, creator=user, created_date=datetime.now().date())
+            tasklist.save()
+        except IntegrityError:
+            return {"message": "Tasklist already present"}
+        return {
+            'tasklist_name': tasklist_name,
+            'craetor': username,
+            'created_date': datetime.now().date(),
+            'tasklist_id': tasklist.pk,
+        }
+
+        pass
+    else:
+        return {"message": "User not authenticated"}
+
+
+def is_authendicated_user(user: User, received_token: str):
+    if Token.objects.get(user=user).key == received_token:
+        return True
+    return False

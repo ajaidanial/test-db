@@ -3,7 +3,6 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
 
 from testapp import database_operations
-from testapp.serializers import TaskListSerializer
 
 
 @csrf_exempt
@@ -35,20 +34,23 @@ def task_op(request):
 @csrf_exempt
 def tasklist_op(request):
     if request.method == 'POST':
-        tasklist = TaskListSerializer(data=dict(request.POST.items()))
-        if tasklist.is_valid():
-            tasklist.save()
-            return JsonResponse(tasklist.data)
-        #     TODO: token auth
-        else:
-            return JsonResponse(tasklist.errors)
-    return HttpResponse("tasklist op")
+        try:
+            username: str = request.POST['username']
+            tasklist_name: str = request.POST['taslklist_name']
+            received_token: str = request.META.get('HTTP_AUTHORIZATION')
+            # return HttpResponse(received_token)
+        except MultiValueDictKeyError:
+            return HttpResponse("hello")
+        return JsonResponse(database_operations.create_tasklist_api(username, received_token, tasklist_name))
+    if request.method == 'DELETE':
+        pass
+    return HttpResponse(None)
 
 
 """
-user op '/'
-    - login (token)
-    - register (tokeb)
+# user op '/'
+#     - login (token)
+#     - register (tokeb)
 
 tasklist 'tasklist'
     - create
