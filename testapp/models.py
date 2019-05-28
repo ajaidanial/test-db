@@ -1,22 +1,15 @@
-from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-# class User(models.Model):
-#     name = models.CharField(max_length=30, unique=True)
-#     email = models.CharField(max_length=30, unique=True)
-#
-#     def __str__(self):
-#         return self.name
-
-
-class User(AbstractBaseUser):
-    name = models.CharField(max_length=30, unique=True)
-    email = models.CharField(max_length=30, unique=True)
-    password = models.CharField(max_length=30, default='test')
-
-    REQUIRED_FIELDS = ['name']
-    USERNAME_FIELD = 'email'
+class User(AbstractUser):
+    name = models.CharField(max_length=300)
+    username = models.CharField(max_length=300, unique=True)
+    email = models.CharField(max_length=300, unique=True)
+    password = models.CharField(max_length=300, default='test')
+    # REQUIRED_FIELDS = ['name', 'password']
+    # USERNAME_FIELD = 'email'
+    # objects = UserManager()
 
     def __str__(self):
         return self.name
