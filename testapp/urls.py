@@ -8,12 +8,13 @@ urlpatterns = [
     path('task', views.task_get, name='tasks info'),
     path('task/<int:id>', views.task_delete, name='delete task'),
     path('register/', views.register_user, name='register user'),
+    path('login/', views.login_user, name='login user'),
 ]
 
 """
 All POST data in JSON type
-/register: POST {username, email, password}
-/login: POST {username, password}
+# /register: POST {username, email, password}
+# /login: POST {username, password}
 
 /task: POST {...} create a task
 # /task/<task_id>: DELETE deletes the task

@@ -243,7 +243,7 @@ def delete_task(id: int, received_token: str) -> dict:
         return {'success': False, "message": "Token invalid"}
 
 
-def singup_user_and_return_token(username: str, password: str, email: str = None) -> dict:
+def singup_user_and_return_token(username: str, password: str, email: str) -> dict:
     try:
         user = User(username=username, password=password, email=email)
         user.validate_unique()
@@ -252,3 +252,13 @@ def singup_user_and_return_token(username: str, password: str, email: str = None
         return {error[0]: error[1] for error in errors}
     token = Token.objects.create(user=user)
     return {"success": True, "token": token.key}
+
+
+def login_user(username: str, received_token: str) -> dict:
+    try:
+        user = get_user(username)
+    except ObjectDoesNotExist:
+        return {'success': False, 'message': 'User does not exists'}
+    if user == Token.objects.get(key=received_token).user:
+        return {'success': True, 'message': 'User auth success'}
+    return {'success': False, 'message': 'User auth unsuccessful'}

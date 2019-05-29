@@ -107,18 +107,32 @@ def register_user(request):
         try:
             username: str = request.POST['username']
             password: str = request.POST['password']
+            received_token: str = request.META.get('HTTP_AUTHORIZATION')
             email: str = request.POST['email']
         except MultiValueDictKeyError:
             return HttpResponse(None)
-        return JsonResponse(database_operations.singup_user_and_return_token(username, password, email))
+        return JsonResponse(database_operations.loginuser(username, password, email))
+    else:
+        return HttpResponse(None)
+
+
+@csrf_exempt
+def login_user(request):
+    if request.method == "POST":
+        try:
+            username: str = request.POST['username']
+            received_token: str = request.META.get('HTTP_AUTHORIZATION')
+        except MultiValueDictKeyError:
+            return HttpResponse(None)
+        return JsonResponse(database_operations.login_user(username, received_token))
     else:
         return HttpResponse(None)
 
 
 """
 All POST data in JSON type
-/register: POST {username, email, password}
-/login: POST {username, password}
+# /register: POST {username, email, password}
+# /login: POST {username, password}
 /task: POST {...} create a task
 # /task/<task_id>: DELETE deletes the task
 # /tasks: GET - return all tasks with id and ...
