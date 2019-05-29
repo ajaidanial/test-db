@@ -29,9 +29,9 @@ def user_op(request):
 @csrf_exempt
 def task_get(request):
     if request.method == 'GET':
-        return JsonResponse(database_operations.get_all_tasks())
-    else:
-        return HttpResponse(None)
+        received_token: str = request.META.get('HTTP_AUTHORIZATION')
+        return JsonResponse(database_operations.get_all_tasks(received_token))
+    return HttpResponse(None)
 
 
 """
@@ -90,6 +90,14 @@ def tasklist_op(request):
             return JsonResponse(database_operations.delete_tasklist_api(username, received_token, tasklist_name))
         return HttpResponse(None)
     return HttpResponse(None)
+
+
+@csrf_exempt
+def task_delete(request, id):
+    if request.method == "DELETE":
+        return HttpResponse(id)
+    else:
+        return HttpResponse(None)
 
 
 """

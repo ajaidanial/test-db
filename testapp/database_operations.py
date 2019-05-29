@@ -200,17 +200,20 @@ def create_task(
         return {"message": "User not authenticated"}
 
 
-def get_all_tasks() -> Dict[str, dict]:  # returns all the tasks
-    tasks = Task.objects.prefetch_related("assigned_users").all()
-    return_dict = {}
-    for task in tasks:
-        return_dict[task.name] = instance2dict(task)
-    return return_dict
+def get_all_tasks(received_token: str) -> Dict[str, dict]:  # returns all the tasks
+    if is_user_authenticated_by_token(received_token):
+        tasks = Task.objects.prefetch_related("assigned_users").all()
+        return_dict = {}
+        for task in tasks:
+            return_dict[task.name] = instance2dict(task)
+        return return_dict
+    else:
+        return {"response": {'success': False, "message": "Token invalid"}}
 
 
 def instance2dict(instance):  # helper function to get many to many relations
     from django.db.models.fields.related import ManyToManyField
-    metas = instance.meta
+    metas = instance._meta
     data = {}
     for f in chain(metas.concrete_fields, metas.many_to_many):
         if isinstance(f, ManyToManyField):
@@ -219,3 +222,11 @@ def instance2dict(instance):  # helper function to get many to many relations
         else:
             data[str(f.name)] = str(getattr(instance, f.name, False))
     return data
+
+
+def is_user_authenticated_by_token(received_token: str) -> bool:
+    try:
+        user = Token.objects.get(key=received_token).user
+        return True
+    except ObjectDoesNotExist:
+        return False
