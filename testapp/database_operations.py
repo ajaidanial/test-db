@@ -230,3 +230,14 @@ def is_user_authenticated_by_token(received_token: str) -> bool:
         return True
     except ObjectDoesNotExist:
         return False
+
+
+def delete_task(id: int, received_token: str) -> dict:
+    if is_user_authenticated_by_token(received_token):
+        try:
+            Task.objects.get(pk=id).delete()
+            return {'success': True, "message": "Task deleted"}
+        except ObjectDoesNotExist:
+            return {'success': False, "message": "Task does not exist"}
+    else:
+        return {'success': False, "message": "Token invalid"}

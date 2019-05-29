@@ -15,7 +15,7 @@ All POST data in JSON type
 /login: POST {username, password}
 
 /task: POST {...} create a task
-/task/<task_id>: DELETE deletes the task
+# /task/<task_id>: DELETE deletes the task
 # /tasks: GET - return all tasks with id and ...
 /task/<task_id>: PUT {...} update tasks
 

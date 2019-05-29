@@ -95,7 +95,8 @@ def tasklist_op(request):
 @csrf_exempt
 def task_delete(request, id):
     if request.method == "DELETE":
-        return HttpResponse(id)
+        received_token: str = request.META.get('HTTP_AUTHORIZATION')
+        return JsonResponse(database_operations.delete_task(id, received_token))
     else:
         return HttpResponse(None)
 
@@ -105,7 +106,7 @@ All POST data in JSON type
 /register: POST {username, email, password}
 /login: POST {username, password}
 /task: POST {...} create a task
-/task/<task_id>: DELETE deletes the task
+# /task/<task_id>: DELETE deletes the task
 # /tasks: GET - return all tasks with id and ...
 /task/<task_id>: PUT {...} update tasks
 
