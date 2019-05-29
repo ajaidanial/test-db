@@ -169,7 +169,7 @@ def create_task(
         taskname: str,
         due_date: datetime.now().date(),
         is_open: bool,
-        assigned_users: list,
+        assigned_users: str,
         tasklist: str,
         received_token: str,
         username: str = None,

@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
@@ -37,10 +38,10 @@ def task_op(request):
         try:
             received_token: str = request.META.get('HTTP_AUTHORIZATION')
             name: str = request.POST['name']
-            due_date: datetime.date() = request.POST['due_date']
-            is_open: datetime.date() = request.POST['is_open']
-            assigned_users: datetime.date() = request.POST['assigned_users']
-            task_list: datetime.date() = request.POST['task_list']
+            due_date: datetime.now().date() = request.POST['due_date']
+            is_open: bool = request.POST['is_open']
+            assigned_users: str = request.POST['assigned_users']
+            task_list: str = request.POST['task_list']
         except MultiValueDictKeyError:
             return HttpResponse(None)
         return JsonResponse(database_operations.create_task(
@@ -114,12 +115,17 @@ def tasklist_op(request):
 
 
 @csrf_exempt
-def task_delete(request, id):
+def task_delete_update(request, id):
+    received_token: str = request.META.get('HTTP_AUTHORIZATION')
     if request.method == "DELETE":
-        received_token: str = request.META.get('HTTP_AUTHORIZATION')
         return JsonResponse(database_operations.delete_task(id, received_token))
-    else:
-        return HttpResponse(None)
+    if request.method == "PUT":
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        content = body['content']
+        return HttpResponse(content)
+        pass
+    return HttpResponse(None)
 
 
 @csrf_exempt
@@ -132,7 +138,7 @@ def register_user(request):
             email: str = request.POST['email']
         except MultiValueDictKeyError:
             return HttpResponse(None)
-        return JsonResponse(database_operations.loginuser(username, password, email))
+        return JsonResponse(database_operations.singup_user_and_return_token(username, password, email))
     else:
         return HttpResponse(None)
 
