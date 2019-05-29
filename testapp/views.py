@@ -165,14 +165,15 @@ def login_user(request):
 
 
 """
-All POST data in JSON type
-# /register: POST {username, email, password}
-# /login: POST {username, password}
-# /task: POST {...} create a task
-# /task/<task_id>: DELETE deletes the task
-# /tasks: GET - return all tasks with id and ...
-/task/<task_id>: PUT {...} update tasks
-
-Identifier: Token only
+serializer
+urls
+task
+list of data
+hyperlinks
+task_display all data
+json boolean
+tasklist based segregation
+instance2dict -> serializer
+change everything to id
+make id as primary key
 """
-# TODO: json format
