@@ -1,3 +1,5 @@
+import datetime
+
 from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
@@ -27,10 +29,29 @@ def user_op(request):
 
 
 @csrf_exempt
-def task_get(request):
+def task_op(request):
     if request.method == 'GET':
         received_token: str = request.META.get('HTTP_AUTHORIZATION')
         return JsonResponse(database_operations.get_all_tasks(received_token))
+    if request.method == 'POST':
+        try:
+            received_token: str = request.META.get('HTTP_AUTHORIZATION')
+            name: str = request.POST['name']
+            due_date: datetime.date() = request.POST['due_date']
+            is_open: datetime.date() = request.POST['is_open']
+            assigned_users: datetime.date() = request.POST['assigned_users']
+            task_list: datetime.date() = request.POST['task_list']
+        except MultiValueDictKeyError:
+            return HttpResponse(None)
+        return JsonResponse(database_operations.create_task(
+            taskname=name,
+            due_date=due_date,
+            is_open=is_open,
+            assigned_users=assigned_users,
+            tasklist=task_list,
+            received_token=received_token,
+        ))
+        pass
     return HttpResponse(None)
 
 
@@ -133,7 +154,7 @@ def login_user(request):
 All POST data in JSON type
 # /register: POST {username, email, password}
 # /login: POST {username, password}
-/task: POST {...} create a task
+# /task: POST {...} create a task
 # /task/<task_id>: DELETE deletes the task
 # /tasks: GET - return all tasks with id and ...
 /task/<task_id>: PUT {...} update tasks

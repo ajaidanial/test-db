@@ -171,10 +171,13 @@ def create_task(
         is_open: bool,
         assigned_users: list,
         tasklist: str,
-        username: str,
         received_token: str,
+        username: str = None,
 ):
-    user = get_user(username)
+    if username is None:
+        user = Token.objects.get(key=received_token).user
+    else:
+        user = get_user(username)
     if is_authenticated_user(user, received_token):
         try:
             try:
@@ -182,13 +185,17 @@ def create_task(
                              assigned_users.split(',')]
             except ObjectDoesNotExist:
                 return {"message": "User does not exists | aborted action"}
+            try:
+                tasklist_object = TaskList.objects.get(name=tasklist)
+            except ObjectDoesNotExist:
+                return {"message": "Tasklist does not exists | aborted action"}
             task = Task.objects.create(
                 name=taskname,
                 created_date=datetime.now().date(),
                 due_date=due_date,
                 is_open=is_open,
                 creator=user,
-                task_list=TaskList.objects.get(name=tasklist),
+                task_list=tasklist_object,
             )
             for user in user_list:
                 task.assigned_users.add(user)
