@@ -257,6 +257,8 @@ def singup_user_and_return_token(username: str, password: str, email: str) -> di
         user.save()
     except Exception as errors:
         return {error[0]: error[1] for error in errors}
+    except Exception as errors:
+        return {error[0]: error[1] for error in errors}
     token = Token.objects.create(user=user)
     return {"success": True, "token": token.key}
 

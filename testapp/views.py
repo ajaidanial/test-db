@@ -1,9 +1,7 @@
-import datetime
-import json
-
 from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.utils import json
 
 from testapp import database_operations
 
@@ -37,13 +35,18 @@ def task_op(request):
     if request.method == 'POST':
         try:
             received_token: str = request.META.get('HTTP_AUTHORIZATION')
-            name: str = request.POST['name']
-            due_date: datetime.now().date() = request.POST['due_date']
-            is_open: bool = request.POST['is_open']
-            assigned_users: str = request.POST['assigned_users']
-            task_list: str = request.POST['task_list']
+            data = json.loads(request.body)
+            name: str = data['name']
+            due_date: str = data['due_date']
+            is_open: bool = data['is_open']
+            assigned_users: str = data['assigned_users']
+            task_list: str = data['task_list']
+
         except MultiValueDictKeyError:
             return HttpResponse(None)
+        except KeyError:
+            return JsonResponse(
+                {'success': False, 'required data': 'name, due_date, is_open, assigned_users, task_list'})
         return JsonResponse(database_operations.create_task(
             taskname=name,
             due_date=due_date,
@@ -121,9 +124,8 @@ def task_delete_update(request, id):
         return JsonResponse(database_operations.delete_task(id, received_token))
     if request.method == "PUT":
         body_unicode = request.body.decode('utf-8')
-        body = json.loads(body_unicode)
-        content = body['content']
-        return HttpResponse(content)
+        body_data = json.loads(body_unicode)
+        return HttpResponse(body_data)
         pass
     return HttpResponse(None)
 
@@ -132,12 +134,14 @@ def task_delete_update(request, id):
 def register_user(request):
     if request.method == "POST":
         try:
-            username: str = request.POST['username']
-            password: str = request.POST['password']
-            received_token: str = request.META.get('HTTP_AUTHORIZATION')
-            email: str = request.POST['email']
+            data = json.loads(request.body)
+            username: str = data['username']
+            password: str = data['password']
+            email: str = data['email']
         except MultiValueDictKeyError:
             return HttpResponse(None)
+        except KeyError:
+            return JsonResponse({'success': False, 'required data': 'username, password, email'})
         return JsonResponse(database_operations.singup_user_and_return_token(username, password, email))
     else:
         return HttpResponse(None)
@@ -147,10 +151,13 @@ def register_user(request):
 def login_user(request):
     if request.method == "POST":
         try:
-            username: str = request.POST['username']
+            data = json.loads(request.body)
+            username: str = data['username']
             received_token: str = request.META.get('HTTP_AUTHORIZATION')
         except MultiValueDictKeyError:
             return HttpResponse(None)
+        except KeyError:
+            return JsonResponse({'success': False, 'required data': 'username'})
         return JsonResponse(database_operations.login_user(username, received_token))
     else:
         return HttpResponse(None)
