@@ -123,10 +123,11 @@ def task_delete_update(request, id):
     if request.method == "DELETE":
         return JsonResponse(database_operations.delete_task(id, received_token))
     if request.method == "PUT":
-        body_unicode = request.body.decode('utf-8')
-        body_data = json.loads(body_unicode)
-        return HttpResponse(body_data)
-        pass
+        received_token: str = request.META.get('HTTP_AUTHORIZATION')
+        data = json.loads(request.body)
+        if data == {}:
+            return HttpResponse(None)
+        return JsonResponse(database_operations.update_task(data, received_token))
     return HttpResponse(None)
 
 

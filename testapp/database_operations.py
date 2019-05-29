@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from itertools import chain
 from typing import Dict
@@ -271,3 +272,7 @@ def login_user(username: str, received_token: str) -> dict:
     if user == Token.objects.get(key=received_token).user:
         return {'success': True, 'message': 'User auth success'}
     return {'success': False, 'message': 'User auth unsuccessful'}
+
+
+def update_task(data: json, received_token):
+    pass
