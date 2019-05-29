@@ -87,17 +87,13 @@ def tasklist_op(request):
 
 
 """
-# user op '/'
-#     - login (token)
-#     - register (tokeb)
+All POST data in JSON type
+/register: POST {username, email, password}
+/login: POST {username, password}
+/task: POST {...} create a task
+/task/<task_id>: DELETE deletes the task
+/tasks: GET - return all tasks with id and ...
+/task/<task_id>: PUT {...} update tasks
 
-# tasklist 'tasklist'
-#     - create
-#     - delete
-
-task 'task'
-    - delete
-    - create
-    - get all tasks for user
-    - close task
+Identifier: Token only
 """
