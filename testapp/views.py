@@ -1,3 +1,5 @@
+import datetime
+
 from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
@@ -37,10 +39,19 @@ def task_op(request):
         except MultiValueDictKeyError:
             return HttpResponse(None)
         if command == 'create':
-            due_date: str = request.POST['due_date']
-            tasklist_name: str = request.POST['task_name']
+            due_date: datetime.now().date() = request.POST['due_date']
+            tasklist_name: str = request.POST['tasklist_name']
             is_open: bool = request.POST['is_open']
             assigned_users: list = request.POST['assigned_users']
+            return JsonResponse(database_operations.create_task(
+                taskname=taskname,
+                due_date=due_date,
+                is_open=is_open,
+                assigned_users=assigned_users,
+                tasklist=tasklist_name,
+                username=username,
+                received_token=received_token,
+            ))
         if command == 'delete':
             return JsonResponse(database_operations.delete_task(taskname, username, received_token))
         if command == 'close':

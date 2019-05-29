@@ -161,3 +161,38 @@ def delete_task(taskname: str, username: str, received_token: str) -> dict:
             return {"message": "Task does not exists || Permission error"}
     else:
         return {"message": "User not authenticated"}
+
+
+def create_task(
+        taskname: str,
+        due_date: datetime.now().date(),
+        is_open: bool,
+        assigned_users: list,
+        tasklist: str,
+        username: str,
+        received_token: str,
+):
+    user = get_user(username)
+    if is_authenticated_user(user, received_token):
+        try:
+            try:
+                user_list = [User.objects.get(username=assigned_users_name) for assigned_users_name in
+                             assigned_users.split(',')]
+            except ObjectDoesNotExist:
+                return {"message": "User does not exists | aborted action"}
+            task = Task.objects.create(
+                name=taskname,
+                created_date=datetime.now().date(),
+                due_date=due_date,
+                is_open=is_open,
+                creator=user,
+                task_list=TaskList.objects.get(name=tasklist),
+            )
+            for user in user_list:
+                task.assigned_users.add(user)
+            task.save()
+            return {"message": "Task created"}
+        except IntegrityError:
+            return {"message": "Task already exists"}
+    else:
+        return {"message": "User not authenticated"}
