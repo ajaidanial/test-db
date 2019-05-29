@@ -241,3 +241,14 @@ def delete_task(id: int, received_token: str) -> dict:
             return {'success': False, "message": "Task does not exist"}
     else:
         return {'success': False, "message": "Token invalid"}
+
+
+def singup_user_and_return_token(username: str, password: str, email: str = None) -> dict:
+    try:
+        user = User(username=username, password=password, email=email)
+        user.validate_unique()
+        user.save()
+    except Exception as errors:
+        return {error[0]: error[1] for error in errors}
+    token = Token.objects.create(user=user)
+    return {"success": True, "token": token.key}

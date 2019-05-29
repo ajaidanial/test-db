@@ -101,6 +101,20 @@ def task_delete(request, id):
         return HttpResponse(None)
 
 
+@csrf_exempt
+def register_user(request):
+    if request.method == "POST":
+        try:
+            username: str = request.POST['username']
+            password: str = request.POST['password']
+            email: str = request.POST['email']
+        except MultiValueDictKeyError:
+            return HttpResponse(None)
+        return JsonResponse(database_operations.singup_user_and_return_token(username, password, email))
+    else:
+        return HttpResponse(None)
+
+
 """
 All POST data in JSON type
 /register: POST {username, email, password}
@@ -112,3 +126,4 @@ All POST data in JSON type
 
 Identifier: Token only
 """
+# TODO: json format

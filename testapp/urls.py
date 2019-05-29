@@ -7,6 +7,7 @@ urlpatterns = [
     path('tasklist', views.tasklist_op, name='tasklist operations'),
     path('task', views.task_get, name='tasks info'),
     path('task/<int:id>', views.task_delete, name='delete task'),
+    path('register/', views.register_user, name='register user'),
 ]
 
 """
