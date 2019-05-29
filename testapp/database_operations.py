@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from itertools import chain
-from typing import Dict
+from typing import Dict, List
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
@@ -276,14 +276,27 @@ def login_user(username: str, received_token: str) -> dict:
 
 def update_task(data: json, received_token: str, id: int) -> dict:
     if is_user_authenticated_by_token(received_token):
+
         try:
             task = Task.objects.get(id=id)
+
+            if data['task_list'] is not None:
+                data['task_list'] = TaskList.objects.get(name=data['task_list'])
+            if data['assigned_users'] is not None:
+                temp_user_str = data['assigned_users']
+                user_object_list: List[User] = [User.objects.get(username=assigned_users_name) for assigned_users_name
+                                                in
+                                                temp_user_str.split(',')]
+                task.assigned_users.set(user_object_list)
+                del data['assigned_users']
+
             for key, value in data.items():
                 task.update_field(key, value)
+
             task.save(update_fields=data.keys())
             return {'success': True, "message": "Task updated"}
         except ObjectDoesNotExist:
-            return {'success': False, "message": "Task does not exist"}
+            return {'success': False, "message": "Object does not exist - Task/User"}
         except AttributeError:
             return {'success': False, "message": "Unknown parameter"}
         except IntegrityError:
