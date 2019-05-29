@@ -274,5 +274,19 @@ def login_user(username: str, received_token: str) -> dict:
     return {'success': False, 'message': 'User auth unsuccessful'}
 
 
-def update_task(data: json, received_token):
-    pass
+def update_task(data: json, received_token: str, id: int) -> dict:
+    if is_user_authenticated_by_token(received_token):
+        try:
+            task = Task.objects.get(id=id)
+            for key, value in data.items():
+                task.update_field(key, value)
+            task.save(update_fields=data.keys())
+            return {'success': True, "message": "Task updated"}
+        except ObjectDoesNotExist:
+            return {'success': False, "message": "Task does not exist"}
+        except AttributeError:
+            return {'success': False, "message": "Unknown parameter"}
+        except IntegrityError:
+            return {'success': False, "message": "Duplicate parameter"}
+    else:
+        return {'success': False, "message": "Token invalid"}

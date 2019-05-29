@@ -127,7 +127,7 @@ def task_delete_update(request, id):
         data = json.loads(request.body)
         if data == {}:
             return HttpResponse(None)
-        return JsonResponse(database_operations.update_task(data, received_token))
+        return JsonResponse(database_operations.update_task(data, received_token, id))
     return HttpResponse(None)
 
 

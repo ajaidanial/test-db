@@ -23,6 +23,12 @@ class Task(models.Model):
     def __str__(self):
         return self.name
 
+    def update_field(self, key, value):
+        # This will raise an AttributeError if the key isn't an attribute
+        # of your model
+        getattr(self, key)
+        setattr(self, key, value)
+
 
 class TaskList(models.Model):
     name = models.CharField(max_length=300, unique=True)
