@@ -1,5 +1,3 @@
-import datetime
-
 from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
@@ -29,7 +27,14 @@ def user_op(request):
 
 
 @csrf_exempt
-def task_op(request):
+def task_get(request):
+    if request.method == 'GET':
+        return JsonResponse(database_operations.get_all_tasks())
+    else:
+        return HttpResponse(None)
+
+
+"""
     if request.method == 'POST':  # to create, delete and close a task
         try:
             command: str = request.POST['command']
@@ -66,6 +71,7 @@ def task_op(request):
             return HttpResponse(None)
         return JsonResponse(database_operations.get_tasks_for_user(username, received_token))
     return HttpResponse(None)
+"""
 
 
 @csrf_exempt
@@ -92,7 +98,7 @@ All POST data in JSON type
 /login: POST {username, password}
 /task: POST {...} create a task
 /task/<task_id>: DELETE deletes the task
-/tasks: GET - return all tasks with id and ...
+# /tasks: GET - return all tasks with id and ...
 /task/<task_id>: PUT {...} update tasks
 
 Identifier: Token only

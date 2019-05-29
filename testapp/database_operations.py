@@ -1,4 +1,6 @@
 from datetime import datetime
+from itertools import chain
+from typing import Dict
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
@@ -196,3 +198,24 @@ def create_task(
             return {"message": "Task already exists"}
     else:
         return {"message": "User not authenticated"}
+
+
+def get_all_tasks() -> Dict[str, dict]:  # returns all the tasks
+    tasks = Task.objects.prefetch_related("assigned_users").all()
+    return_dict = {}
+    for task in tasks:
+        return_dict[task.name] = instance2dict(task)
+    return return_dict
+
+
+def instance2dict(instance):  # helper function to get many to many relations
+    from django.db.models.fields.related import ManyToManyField
+    metas = instance.meta
+    data = {}
+    for f in chain(metas.concrete_fields, metas.many_to_many):
+        if isinstance(f, ManyToManyField):
+            data[str(f.name)] = [tmp_object.username
+                                 for tmp_object in f.value_from_object(instance)]
+        else:
+            data[str(f.name)] = str(getattr(instance, f.name, False))
+    return data
