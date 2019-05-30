@@ -29,10 +29,9 @@ def user_op(request):
 
 @csrf_exempt
 def task_op(request):
-    if request.method == 'GET':
-        received_token: str = request.META.get('HTTP_AUTHORIZATION')
-        return JsonResponse(database_operations.get_all_tasks(received_token))
-    if request.method == 'POST':
+    if request.method == 'GET':  # Get all tasks
+        return JsonResponse(database_operations.get_all_tasks(), safe=False)
+    if request.method == 'POST':  # Create new task
         try:
             received_token: str = request.META.get('HTTP_AUTHORIZATION')
             data = json.loads(request.body)
@@ -154,12 +153,12 @@ def login_user(request):
         try:
             data = json.loads(request.body)
             username: str = data['username']
-            received_token: str = request.META.get('HTTP_AUTHORIZATION')
+            password: str = data['password']
         except MultiValueDictKeyError:
             return HttpResponse(None)
         except KeyError:
-            return JsonResponse({'success': False, 'required data': 'username'})
-        return JsonResponse(database_operations.login_user(username, received_token))
+            return JsonResponse({'success': False, 'required data': 'username, password'})
+        return JsonResponse(database_operations.login_user(username, password))
     else:
         return HttpResponse(None)
 
@@ -176,4 +175,15 @@ tasklist based segregation
 instance2dict -> serializer
 change everything to id
 make id as primary key
+"""
+
+"""
+All POST data in JSON type
+# /register: POST {username, email, password}
+# /login: POST {username, password}
+# /task: POST {...} create a task
+# /task/<task_id>: DELETE deletes the task
+# /tasks: GET - return all tasks with id and ...
+/task/<task_id>: PUT {...} update tasks
+Identifier: Token only
 """

@@ -6,10 +6,10 @@ urlpatterns = [
     path('', views.user_op, name='user operations'),
     path('tasklist', views.tasklist_op, name='tasklist operations'),
 
-    path('task', views.task_op, name='tasks info'),
+    path('tasks', views.task_op, name='tasks info'),
     path('task/<int:id>', views.task_delete_update, name='delete task'),
-    path('register/', views.register_user, name='register user'),
-    path('login/', views.login_user, name='login user'),
+    path('register/', views.register_user, name='register user'),  # Done
+    path('login/', views.login_user, name='login user'),  # Done
 ]
 
 """

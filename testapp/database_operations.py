@@ -9,7 +9,7 @@ from django.db.models.query import QuerySet
 from rest_framework.authtoken.models import Token
 
 from testapp.models import *
-from testapp.serializers import UserSerializer
+from testapp.serializers import UserSerializer, TaskSerializer
 
 
 def clear_all_tasks_for_user(name: str) -> None:
@@ -193,7 +193,7 @@ def create_task(
             task = Task.objects.create(
                 name=taskname,
                 created_date=datetime.now().date(),
-                due_date=due_date,
+                due_date=datetime.strptime(due_date, '%m-%d-%Y').date(),
                 is_open=is_open,
                 creator=user,
                 task_list=tasklist_object,
@@ -208,15 +208,10 @@ def create_task(
         return {"message": "User not authenticated"}
 
 
-def get_all_tasks(received_token: str) -> Dict[str, dict]:  # returns all the tasks
-    if is_user_authenticated_by_token(received_token):
-        tasks = Task.objects.prefetch_related("assigned_users").all()
-        return_dict = {}
-        for task in tasks:
-            return_dict[task.name] = instance2dict(task)
-        return return_dict
-    else:
-        return {"response": {'success': False, "message": "Token invalid"}}
+def get_all_tasks() -> Dict[str, dict]:  # returns all the tasks
+    tasks = Task.objects.prefetch_related("assigned_users").all()
+    tasks_serialized_data = TaskSerializer(tasks, many=True).data
+    return tasks_serialized_data
 
 
 def instance2dict(instance):  # helper function to get many to many relations
@@ -258,20 +253,22 @@ def singup_user_and_return_token(username: str, password: str, email: str) -> di
         user.save()
     except Exception as errors:
         return {error[0]: error[1] for error in errors}
-    except Exception as errors:
-        return {error[0]: error[1] for error in errors}
     token = Token.objects.create(user=user)
-    return {"success": True, "token": token.key}
+    serialized_user_data = UserSerializer(user).data
+    serialized_user_data['token'] = token.key
+    return serialized_user_data
 
 
-def login_user(username: str, received_token: str) -> dict:
+def login_user(username: str, password: str, ) -> dict:
     try:
-        user = get_user(username)
+        user = User.objects.get(username=username, password=password)
     except ObjectDoesNotExist:
-        return {'success': False, 'message': 'User does not exists'}
-    if user == Token.objects.get(key=received_token).user:
-        return {'success': True, 'message': 'User auth success'}
-    return {'success': False, 'message': 'User auth unsuccessful'}
+        return {'success': False, 'message': 'User does not exists | invalid credentials'}
+
+    token = Token.objects.get(user=user)
+    serialized_user_data = UserSerializer(user).data
+    serialized_user_data['token'] = token.key
+    return serialized_user_data
 
 
 def update_task(data: json, received_token: str, id: int) -> dict:
