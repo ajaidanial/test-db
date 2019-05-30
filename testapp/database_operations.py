@@ -176,7 +176,10 @@ def create_task(
         username: str = None,
 ):
     if username is None:
-        user = Token.objects.get(key=received_token).user
+        try:
+            user = Token.objects.get(key=received_token).user
+        except ObjectDoesNotExist:
+            return {"success": False, "message": "token | user invalid"}
     else:
         user = get_user(username)
     if is_authenticated_user(user, received_token):
@@ -201,7 +204,8 @@ def create_task(
             for user in user_list:
                 task.assigned_users.add(user)
             task.save()
-            return {"message": "Task created"}
+            serialized_task_data = TaskSerializer(task).data
+            return serialized_task_data
         except IntegrityError:
             return {"message": "Task already exists"}
     else:

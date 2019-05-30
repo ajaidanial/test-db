@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from testapp.models import User, TaskList
+from testapp.models import User, TaskList, Task
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,7 +22,7 @@ class TaskSerializer(serializers.ModelSerializer):
     task_list = TaskListSerializer()
 
     class Meta:
-        model = TaskList
+        model = Task
         fields = (
             'id',
             'name',
