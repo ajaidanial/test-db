@@ -117,7 +117,7 @@ def tasklist_op(request):
 
 
 @csrf_exempt
-def task_delete_update(request, id):
+def task_delete_update_display(request, id):
     received_token: str = request.META.get('HTTP_AUTHORIZATION')
     if request.method == "DELETE":
         return JsonResponse(database_operations.delete_task(id, received_token))
@@ -127,6 +127,24 @@ def task_delete_update(request, id):
         if data == {}:
             return HttpResponse(None)
         return JsonResponse(database_operations.update_task(data, received_token, id))
+    if request.method == 'GET':
+        return JsonResponse(database_operations.get_task(id))
+    return HttpResponse(None)
+
+
+@csrf_exempt
+def get_update_and_delete_tasklist(request, id):
+    received_token: str = request.META.get('HTTP_AUTHORIZATION')
+    if request.method == "DELETE":
+        return JsonResponse(database_operations.delete_tasklist(id, received_token))
+    if request.method == "PUT":
+        received_token: str = request.META.get('HTTP_AUTHORIZATION')
+        data = json.loads(request.body)
+        if data == {}:
+            return HttpResponse(None)
+        return JsonResponse(database_operations.update_task(data, received_token, id))
+    if request.method == 'GET':
+        return JsonResponse(database_operations.get_tasklist(id))
     return HttpResponse(None)
 
 
@@ -161,6 +179,12 @@ def login_user(request):
         return JsonResponse(database_operations.login_user(username, password))
     else:
         return HttpResponse(None)
+
+
+def get_all_tasklists(request):
+    if request.method == "GET":
+        return JsonResponse(database_operations.get_all_tasklist(), safe=False)
+    return HttpResponse(None)
 
 
 """

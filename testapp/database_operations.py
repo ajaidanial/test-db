@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from itertools import chain
-from typing import Dict, List
+from typing import List
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
@@ -9,7 +9,7 @@ from django.db.models.query import QuerySet
 from rest_framework.authtoken.models import Token
 
 from testapp.models import *
-from testapp.serializers import UserSerializer, TaskSerializer
+from testapp.serializers import UserSerializer, TaskSerializer, TaskListSerializer
 
 
 def clear_all_tasks_for_user(name: str) -> None:
@@ -212,10 +212,34 @@ def create_task(
         return {"message": "User not authenticated"}
 
 
-def get_all_tasks() -> Dict[str, dict]:  # returns all the tasks
+def get_all_tasks() -> json:  # returns all the tasks
     tasks = Task.objects.prefetch_related("assigned_users").all()
     tasks_serialized_data = TaskSerializer(tasks, many=True).data
     return tasks_serialized_data
+
+
+def get_all_tasklist() -> json:  # returns all the tasklists
+    tasklists = TaskList.objects.all()
+    tasklists_serialized_data = TaskListSerializer(tasklists, many=True).data
+    return tasklists_serialized_data
+
+
+def get_task(id: int) -> json:  # returns a single task
+    try:
+        task = Task.objects.prefetch_related("assigned_users").get(pk=id)
+        tasks_serialized_data = TaskSerializer(task).data
+        return tasks_serialized_data
+    except ObjectDoesNotExist:
+        return {"success": False, "message": "invalid id"}
+
+
+def get_tasklist(id: int) -> json:  # returns a single tasklist
+    try:
+        tasklist = TaskList.objects.get(pk=id)
+        tasklist_serialized_data = TaskListSerializer(tasklist).data
+        return tasklist_serialized_data
+    except ObjectDoesNotExist:
+        return {"success": False, "message": "invalid id"}
 
 
 def instance2dict(instance):  # helper function to get many to many relations
@@ -246,6 +270,17 @@ def delete_task(id: int, received_token: str) -> dict:
             return {'success': True, "message": "Task deleted"}
         except ObjectDoesNotExist:
             return {'success': False, "message": "Task does not exist"}
+    else:
+        return {'success': False, "message": "Token invalid"}
+
+
+def delete_tasklist(id: int, received_token: str) -> dict:
+    if is_user_authenticated_by_token(received_token):
+        try:
+            TaskList.objects.get(pk=id).delete()
+            return {'success': True, "message": "TaskList deleted"}
+        except ObjectDoesNotExist:
+            return {'success': False, "message": "TaskList does not exist"}
     else:
         return {'success': False, "message": "Token invalid"}
 
