@@ -58,46 +58,6 @@ def task_op(request):
     return HttpResponse(None)
 
 
-"""
-    if request.method == 'POST':  # to create, delete and close a task
-        try:
-            command: str = request.POST['command']
-            username: str = request.POST['username']
-            taskname: str = request.POST['task_name']
-            received_token: str = request.META.get('HTTP_AUTHORIZATION')
-        except MultiValueDictKeyError:
-            return HttpResponse(None)
-        if command == 'create':
-            due_date: datetime.now().date() = request.POST['due_date']
-            tasklist_name: str = request.POST['tasklist_name']
-            is_open: bool = request.POST['is_open']
-            assigned_users: list = request.POST['assigned_users']
-            return JsonResponse(database_operations.create_task(
-                taskname=taskname,
-                due_date=due_date,
-                is_open=is_open,
-                assigned_users=assigned_users,
-                tasklist=tasklist_name,
-                username=username,
-                received_token=received_token,
-            ))
-        if command == 'delete':
-            return JsonResponse(database_operations.delete_task(taskname, username, received_token))
-        if command == 'close':
-            return JsonResponse(database_operations.close_task(taskname, username, received_token))
-        return HttpResponse(None)
-
-    if request.method == 'GET':  # to display assigned task to user
-        try:
-            username: str = request.GET['username']
-            received_token: str = request.META.get('HTTP_AUTHORIZATION')
-        except MultiValueDictKeyError:
-            return HttpResponse(None)
-        return JsonResponse(database_operations.get_tasks_for_user(username, received_token))
-    return HttpResponse(None)
-"""
-
-
 @csrf_exempt
 def tasklist_op(request):
     if request.method == 'POST':
@@ -138,11 +98,10 @@ def get_update_and_delete_tasklist(request, id):
     if request.method == "DELETE":
         return JsonResponse(database_operations.delete_tasklist(id, received_token))
     if request.method == "PUT":
-        received_token: str = request.META.get('HTTP_AUTHORIZATION')
         data = json.loads(request.body)
         if data == {}:
             return HttpResponse(None)
-        return JsonResponse(database_operations.update_task(data, received_token, id))
+        return JsonResponse(database_operations.update_tasklist(data, received_token, id))
     if request.method == 'GET':
         return JsonResponse(database_operations.get_tasklist(id))
     return HttpResponse(None)
@@ -181,33 +140,17 @@ def login_user(request):
         return HttpResponse(None)
 
 
-def get_all_tasklists(request):
+@csrf_exempt
+def get_all_and_create_tasklists(request):
     if request.method == "GET":
         return JsonResponse(database_operations.get_all_tasklist(), safe=False)
+    if request.method == 'POST':
+        received_token: str = request.META.get('HTTP_AUTHORIZATION')
+        try:
+            data = json.loads(request.body)
+            name: str = data['name']
+            creator: str = data['creator']
+        except MultiValueDictKeyError:
+            return HttpResponse({"success": False, "required data": "name, creator"})
+        return JsonResponse(database_operations.create_tasklist(name, received_token, creator))
     return HttpResponse(None)
-
-
-"""
-serializer
-urls
-task
-list of data
-hyperlinks
-task_display all data
-json boolean
-tasklist based segregation
-instance2dict -> serializer
-change everything to id
-make id as primary key
-"""
-
-"""
-All POST data in JSON type
-# /register: POST {username, email, password}
-# /login: POST {username, password}
-# /task: POST {...} create a task
-# /task/<task_id>: DELETE deletes the task
-# /tasks: GET - return all tasks with id and ...
-/task/<task_id>: PUT {...} update tasks
-Identifier: Token only
-"""

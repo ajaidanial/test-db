@@ -196,7 +196,7 @@ def create_task(
             task = Task.objects.create(
                 name=taskname,
                 created_date=datetime.now().date(),
-                due_date=datetime.strptime(due_date, '%m-%d-%Y').date(),
+                due_date=due_date,
                 is_open=is_open,
                 creator=user,
                 task_list=tasklist_object,
@@ -310,15 +310,13 @@ def login_user(username: str, password: str, ) -> dict:
     return serialized_user_data
 
 
-def update_task(data: json, received_token: str, id: int) -> dict:
+def update_task(data: json, received_token: str, id: int) -> dict:  # updates a task
     if is_user_authenticated_by_token(received_token):
 
         try:
             task = Task.objects.get(id=id)
 
-            if data['task_list'] is not None:
-                data['task_list'] = TaskList.objects.get(name=data['task_list'])
-            if data['assigned_users'] is not None:
+            if 'assigned_users' in data:
                 temp_user_str = data['assigned_users']
                 user_object_list: List[User] = [User.objects.get(username=assigned_users_name) for assigned_users_name
                                                 in
@@ -327,15 +325,64 @@ def update_task(data: json, received_token: str, id: int) -> dict:
                 del data['assigned_users']
 
             for key, value in data.items():
+                if key == "task_list":
+                    value = TaskList.objects.get(name=data['task_list'])
                 task.update_field(key, value)
 
             task.save(update_fields=data.keys())
             return {'success': True, "message": "Task updated"}
         except ObjectDoesNotExist:
-            return {'success': False, "message": "Object does not exist - Task/User"}
+            return {'success': False, "message": "Object does not exist - Task/User/Tasklist"}
         except AttributeError:
             return {'success': False, "message": "Unknown parameter"}
         except IntegrityError:
             return {'success': False, "message": "Duplicate parameter"}
     else:
         return {'success': False, "message": "Token invalid"}
+
+
+def update_tasklist(data: json, received_token: str, id: int) -> dict:  # updates a tasklist
+    if is_user_authenticated_by_token(received_token):
+
+        try:
+            tasklist = TaskList.objects.get(id=id)
+
+            for key, value in data.items():
+                if key == "creator":
+                    value = User.objects.get(username=value)
+                tasklist.update_field(key, value)
+            tasklist.save(update_fields=data.keys())
+            return {'success': True, "message": "Tasklist updated"}
+        except ObjectDoesNotExist:
+            return {'success': False, "message": "Object does not exist - Tasklist/User"}
+        # except AttributeError:
+        #     return {'success': False, "message": "Unknown parameter"}
+        except IntegrityError:
+            return {'success': False, "message": "Duplicate parameter"}
+    else:
+        return {'success': False, "message": "Token invalid"}
+
+
+def create_tasklist(
+        name: str,
+        received_token: str,
+        creator: str,
+):
+    try:
+        creator = User.objects.get(username=creator)
+    except ObjectDoesNotExist:
+        return {"message": "User does not exists | aborted action"}
+    if is_authenticated_user(creator, received_token):
+        try:
+            task = TaskList.objects.create(
+                name=name,
+                created_date=datetime.now().date(),
+                creator=creator,
+            )
+            task.save()
+            serialized_tasklist_data = TaskListSerializer(task).data
+            return serialized_tasklist_data
+        except IntegrityError:
+            return {"message": "Tasklist already exists"}
+    else:
+        return {"message": "User not authenticated"}
