@@ -1,0 +1,17 @@
+{
+  "name": {
+    "type": "string"
+  },
+  "due_date": {
+    "type": "string"
+  },
+  "is_open": {
+    "type": "boolean"
+  },
+  "assigned_users": {
+    "type": "string"
+  },
+  "task_list": {
+    "type": "string"
+  }
+}

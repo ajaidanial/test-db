@@ -8,7 +8,6 @@ from cerberus import Validator
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db.models.query import QuerySet
-from django.http import JsonResponse
 from rest_framework.authtoken.models import Token
 
 from testapp.models import *

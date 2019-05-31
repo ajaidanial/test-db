@@ -1,6 +1,3 @@
-import os
-
-from cerberus import Validator
 from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
@@ -39,6 +36,9 @@ def task_op(request):
         try:
             received_token: str = request.META.get('HTTP_AUTHORIZATION')
             data = json.loads(request.body)
+
+            if not database_operations.is_valid_schema("create_task.json", data):
+                return JsonResponse({'success': False, 'required data': 'improper schema'})
             name: str = data['name']
             due_date: str = data['due_date']
             is_open: bool = data['is_open']
@@ -114,7 +114,7 @@ def get_update_and_delete_tasklist(request, id):
 @csrf_exempt
 def register_user(request):
     data = json.loads(request.body)
-    if not database_operations.check_schema("user.json", data):
+    if not database_operations.is_valid_schema("user.json", data):
         return JsonResponse({'success': False, 'required data': 'improper schema'})
     if request.method == "POST":
         try:
@@ -139,6 +139,10 @@ def login_user(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
+
+            if not database_operations.is_valid_schema("login_user.json", data):
+                return JsonResponse({'success': False, 'required data': 'improper schema'})
+
             username: str = data['username']
             password: str = data['password']
         except MultiValueDictKeyError:
