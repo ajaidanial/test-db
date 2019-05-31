@@ -2,6 +2,9 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import JSONParser, FormParser
+from rest_framework.renderers import  JSONRenderer
 from rest_framework.response import Response
 # from requests import Response
 from rest_framework.utils import json
@@ -158,8 +161,48 @@ def login_user(request):
         return HttpResponse(None)
 
 
-class GetAllAndCreateTaskList(APIView):
+class LoginUser(APIView):
     authentication_class = TokenAuthentication
+
+    def enforce_csrf(self, request):
+        return
+
+    def post(self, request, format=None):
+        try:
+            data = json.loads(request.body)
+
+            if not database_operations.is_valid_schema("login_user.json", data):
+                return JsonResponse({'success': False, 'required data': 'improper schema'})
+
+            username: str = data['username']
+            password: str = data['password']
+        except MultiValueDictKeyError:
+            return HttpResponse(None)
+        except KeyError:
+            return JsonResponse({'success': False, 'required data': 'username, password'})
+        return JsonResponse(database_operations.login_user(username, password))
+
+
+class APIExtendedView(APIView):
+    schema_class = None
+
+    def validate_data(self) -> bool:
+        if self.request.method == 'POST' and self.schema_class is not None:
+            if not database_operations.is_valid_schema(self.schema_class, self.request.data):
+                return False
+            else:
+                return True
+
+    def send_schema_error_response(self):
+        return JsonResponse({'success': False, 'error': 'Improper schema'})
+
+
+class GetAllAndCreateTaskList(APIExtendedView):
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = (IsAuthenticated, )
+    parser_classes = (JSONParser, FormParser)
+    renderer_classes = (JSONRenderer, )
+    schema_class = "tasklist.json"
 
     def enforce_csrf(self, request):
         return
@@ -168,15 +211,17 @@ class GetAllAndCreateTaskList(APIView):
         return Response(database_operations.get_all_tasklist())
 
     def post(self, request, format=None):
-        received_token: str = request.auth
-        data = json.loads(request.body)
+        if not self.validate_data():
+            return self.send_schema_error_response()
+        # received_token: str = request.auth
+        # data = json.loads(request.body)
+        # data = request.data
+        # if not database_operations.is_valid_schema("tasklist.json", data):
+        #     return JsonResponse({'success': False, 'required data': 'improper schema'})
 
-        if not database_operations.is_valid_schema("tasklist.json", data):
-            return JsonResponse({'success': False, 'required data': 'improper schema'})
-
-        try:
-            name: str = data['name']
-            creator: str = data['creator']
-        except MultiValueDictKeyError:
-            return HttpResponse({"success": False, "required data": "name, creator"})
-        return JsonResponse(database_operations.create_tasklist(name, received_token, creator))
+        # try:
+        #     name: str = data['name']
+        #     creator: str = data['creator']
+        # except MultiValueDictKeyError:
+        #     return HttpResponse({"success": False, "required data": "name, creator"})
+        return JsonResponse(database_operations.create_tasklist(**request.data, user=request.user))

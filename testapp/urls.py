@@ -9,7 +9,7 @@ urlpatterns = [
     path('tasks', views.task_op, name='tasks info'),  # Done
     path('task/<int:id>', views.task_delete_update_display, name='delete, update and view a task'),  # Done
     path('register/', views.register_user, name='register user'),  # Done
-    path('login/', views.login_user, name='login user'),  # Done
+    path('login/', views.LoginUser.as_view(), name='login user'),  # Done
     path('tasklist/<int:id>', views.get_update_and_delete_tasklist, name='view, update and delete a tasklist'),
     path('tasklists/', views.GetAllAndCreateTaskList.as_view(), name='get all tasklists'),
 

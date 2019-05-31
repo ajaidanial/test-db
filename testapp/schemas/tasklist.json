@@ -1,7 +1,4 @@
 {
-  "creator": {
-    "type": "string"
-  },
   "name": {
     "type": "string"
   }

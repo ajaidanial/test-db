@@ -367,19 +367,14 @@ def update_tasklist(data: json, received_token: str, id: int) -> dict:  # update
 
 def create_tasklist(
         name: str,
-        received_token: str,
-        creator: str,
+        user: User,
 ):
-    try:
-        creator = User.objects.get(username=creator)
-    except ObjectDoesNotExist:
-        return {"message": "User does not exists | aborted action"}
-    if is_authenticated_user(creator, received_token):
+    if 1:
         try:
             task = TaskList.objects.create(
                 name=name,
                 created_date=datetime.now().date(),
-                creator=creator,
+                creator=user,
             )
             task.save()
             serialized_tasklist_data = TaskListSerializer(task).data
