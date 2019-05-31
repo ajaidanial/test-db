@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.utils import json
 
 from testapp import database_operations
+from testapp.forms import UserForm
 
 
 @csrf_exempt
@@ -119,7 +120,11 @@ def register_user(request):
             return HttpResponse(None)
         except KeyError:
             return JsonResponse({'success': False, 'required data': 'username, password, email'})
-        return JsonResponse(database_operations.singup_user_and_return_token(username, password, email))
+        user = UserForm(data)
+        if user.is_valid():
+            return JsonResponse(database_operations.singup_user_and_return_token(username, password, email))
+        else:
+            return JsonResponse(user.errors)
     else:
         return HttpResponse(None)
 
