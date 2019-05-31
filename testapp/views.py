@@ -1,7 +1,11 @@
 from django.http import HttpResponse, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.response import Response
+# from requests import Response
 from rest_framework.utils import json
+from rest_framework.views import APIView
 
 from testapp import database_operations
 from testapp.forms import UserForm
@@ -154,12 +158,17 @@ def login_user(request):
         return HttpResponse(None)
 
 
-@csrf_exempt
-def get_all_and_create_tasklists(request):
-    if request.method == "GET":
-        return JsonResponse(database_operations.get_all_tasklist(), safe=False)
-    if request.method == 'POST':
-        received_token: str = request.META.get('HTTP_AUTHORIZATION')
+class GetAllAndCreateTaskList(APIView):
+    authentication_class = TokenAuthentication
+
+    def enforce_csrf(self, request):
+        return
+
+    def get(self, request, format=None):
+        return Response(database_operations.get_all_tasklist())
+
+    def post(self, request, format=None):
+        received_token: str = request.auth
         data = json.loads(request.body)
 
         if not database_operations.is_valid_schema("tasklist.json", data):
@@ -171,4 +180,3 @@ def get_all_and_create_tasklists(request):
         except MultiValueDictKeyError:
             return HttpResponse({"success": False, "required data": "name, creator"})
         return JsonResponse(database_operations.create_tasklist(name, received_token, creator))
-    return HttpResponse(None)

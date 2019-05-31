@@ -11,7 +11,10 @@ urlpatterns = [
     path('register/', views.register_user, name='register user'),  # Done
     path('login/', views.login_user, name='login user'),  # Done
     path('tasklist/<int:id>', views.get_update_and_delete_tasklist, name='view, update and delete a tasklist'),
-    path('tasklists/', views.get_all_and_create_tasklists, name='get all tasklists'),
+    path('tasklists/', views.GetAllAndCreateTaskList.as_view(), name='get all tasklists'),
+
+    path('test/', views.GetAllAndCreateTaskList.as_view(), name='test'),
+
 ]
 
 """
