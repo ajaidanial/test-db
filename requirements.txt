@@ -7,3 +7,4 @@ pytest
 djangorestframework
 markdown
 django-filter
+cerberus

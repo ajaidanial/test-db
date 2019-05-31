@@ -1,11 +1,14 @@
 import json
+import os
 from datetime import datetime
 from itertools import chain
 from typing import List
 
+from cerberus import Validator
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db.models.query import QuerySet
+from django.http import JsonResponse
 from rest_framework.authtoken.models import Token
 
 from testapp.models import *
@@ -386,3 +389,15 @@ def create_tasklist(
             return {"message": "Tasklist already exists"}
     else:
         return {"message": "User not authenticated"}
+
+
+def is_valid_schema(filename: str, data: json):
+    with open(os.path.abspath("testapp/schemas/" + filename)) as f:
+        schema = json.loads(f.read())
+
+    validator = Validator()
+    validator.validate(data, schema)
+
+    if validator.errors:
+        return False
+    return True
